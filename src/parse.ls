@@ -62,6 +62,10 @@ function process-node node
     else if name is '_$'
       type: 'Grasp'
       grasp-type: 'array-wildcard'
+    else if /^\$(\w+)$/.exec name
+      type: 'Grasp'
+      grasp-type: 'named-wildcard'
+      name: that.1
     else if /^_([_a-zA-Z]+)/.exec name
       ident = that.1.replace /_/, '-'
 

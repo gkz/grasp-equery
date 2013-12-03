@@ -125,6 +125,45 @@ suite 'wildcard' ->
       eq code, '[1, 2, _$]', code
       eq code, '[1, _$, 4]', code
 
+suite 'named wildcard' ->
+  test 'simple' ->
+    bi =
+      type: 'BinaryExpression'
+      left: p 'y'
+      right: p 'x'
+      operator: '+'
+
+    bi._named =
+      a: p 'x'
+    eq bi, 'y + $a', code
+
+    bi._named =
+      a: p 'y'
+      b: p 'x'
+    eq bi, '$a + $b', code
+
+  test 'two of the same' ->
+    same =
+      type: 'BinaryExpression'
+      left: p '2'
+      right: p '2'
+      operator: '+'
+      _named:
+        a: p '2'
+
+    eq same, '$a + $a', '2 + 2'
+    eq [], '$a + $a', '1 + 2'
+
+  test 'with _$' ->
+    node =
+      type: 'CallExpression'
+      callee: p 'f'
+      arguments: [p n for n from 1 to 4]
+      _named:
+        a: p '1'
+        b: p '4'
+    eq node, 'f($a, _$, $b)', 'f(1,2,3,4)'
+
 suite 'node type' ->
   test 'simple' ->
     eq code-func, <[ _func_dec _FunctionDeclaration ]>, code

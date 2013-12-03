@@ -11,7 +11,7 @@ extract = (options, input) -->
   if is-type 'Object', input
     input
   else
-    res = p input, options
+    p input, options
 
 q = (selector, code, locations = false) ->
   query selector, (acorn.parse code, {locations})
