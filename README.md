@@ -1,4 +1,4 @@
-# grasp equery
+# grasp equery [![Build Status](https://travis-ci.org/gkz/grasp-equery.png?branch=master)](https://travis-ci.org/gkz/grasp-equery)
 A query engine for [grasp](http://graspjs.com) - use JavaScript code examples with wildcards.
 
 For documentation on the selector format, see [the grasp page on equery](http://graspjs.com/docs/equery).
