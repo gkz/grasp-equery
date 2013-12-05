@@ -37,13 +37,14 @@ function parse selector
   delete ast.start
   delete ast.end
   for key, node of ast when key isnt 'type'
-    if typeof! node is 'Array'
+    node-type = typeof! node
+    if node-type is 'Array'
       for n, i in node
         if process-node n
           node[i] = that
         else
           process-selector n
-    else if typeof! node is 'Object'
+    else if node-type is 'Object'
       if process-node node
         ast[key] = that
       else
@@ -109,6 +110,16 @@ function process-node node
     attrs: processed-attrs
   else if node-type is 'ExpressionStatement'
     process-node node.expression
+  else if not node-type and node.key? and node.value?
+    {key: node-key, value: node-value} = node
+
+    if node-key.type is 'Identifier'
+    and node-key.name is '_'
+    and node-value.type is 'Identifier'
+    and /^\$/.test node-value.name
+      type: 'Grasp'
+      grasp-type: 'array-wildcard'
+      name: /^\$(\w*)$/.exec node-value.name .1
 
 function process-attr attr
   attr-type = attr.type

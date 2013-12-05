@@ -174,6 +174,31 @@ suite 'wildcard' ->
         eq code, '[_$, 1, _$, 4, _$]', code
         eq [], '[_$, 5, _$, 4, _$]', code
 
+    suite 'object' ->
+      code = '({w: 0, x: 1, y: 2, z: 3})'
+
+      test 'all' ->
+        eq code, '({_:$})', code
+
+      test 'start' ->
+        eq code, '({_:$, y:2, z:3})', code
+
+      test 'end' ->
+        eq code, '({w:0, x:1, _:$})', code
+
+      test 'surround' ->
+        eq code, '({_:$, x:1, _:$})', code
+
+      test 'middle' ->
+        eq code, '({w:0, _:$, z:3})', code
+
+      test 'hanging' ->
+        eq code, '({w:0, x:1, y:2, z: 3, _:$})', code
+
+      test 'fail' ->
+        eq [], '({_:$, x:0, _:$})', code
+        eq [], '({x:1, _:$, z:3})', code
+
 suite 'named wildcard' ->
   test 'simple' ->
     bi =
@@ -265,7 +290,7 @@ suite 'named wildcard' ->
       eq call, 'f($a, _$, 2, $c, _$,  $b)', 'f(1,2,2,3,4)'
       eq call, 'f($a, _$, $c, $c, _$,  $b)', 'f(1,2,2,3,4)'
 
-  suite 'named' ->
+  suite 'named array wildcard' ->
     code = '[1,2,3,4]'
     array = p code
 
@@ -321,6 +346,18 @@ suite 'named wildcard' ->
             argument: p 'x'
 
       eq func, 'function f(x) { g(x); _$statements }', code
+
+  suite 'in object' ->
+    code = '({w: 0, x: 1, y: 2, z: 3})'
+    obj = p code
+
+    test 'all' ->
+      obj._named = props: [{key: (p k), value: (p v), kind: 'init'} for k, v of {w: '0', x: '1', y: '2', z: '3'}]
+      eq obj, '({_:$props})', code
+
+    test 'start' ->
+      obj._named = begin: [{key: (p k), value: (p v), kind: 'init'} for k, v of {w: '0', x: '1'}]
+      eq obj, '({_:$begin, y:2, z:3})', code
 
 suite 'node type' ->
   test 'simple' ->

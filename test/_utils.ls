@@ -16,7 +16,7 @@ extract = (options, input) -->
 q = (selector, code, locations = false) ->
   query selector, (acorn.parse code, {locations})
 
-deep-equal = (actual, expected) ->
+deep-equal = (actual, expected) !->
   type-actual = typeof! actual
   type-expected = typeof! expected
   assert.strict-equal type-actual, type-expected, "typeof actual and expected do not match: #type-actual, #type-expected"
@@ -28,7 +28,7 @@ deep-equal = (actual, expected) ->
   | 'Object'  =>
     for key, val of actual when key not in <[ start end ]>
       deep-equal val, expected[key]
-    assert.deep-equal (keys expected._named), (keys actual._named) if expected._named
+    assert.deep-equal (keys actual._named), (keys expected._named) if expected._named
   | otherwise => assert.deep-equal actual, expected, "primitive value not equal: #actual, #expected"
 
 eq = (answers, selectors, code, unwrap-exp-state = true, unwrap-program = true, loc = false) ->
