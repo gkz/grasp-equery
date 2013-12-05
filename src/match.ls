@@ -1,5 +1,5 @@
 {primitive-only-attributes, either-attributes} = require 'grasp-syntax-javascript'
-{all} = require 'prelude-ls'
+{all, tail} = require 'prelude-ls'
 {get-node-at-path} = require './common'
 
 !function match-node results, query, main-node
@@ -23,24 +23,47 @@
           return false unless eq target-node[prop], selector-node[prop]
         true
     else if selector-node-type is 'Array'
-      len = selector-node.length
-      target-len = target-node.length
-      arr-wildcard-matched = false
-      i = 0
-      for node in selector-node
-        if match-array-wildcard node
-          if i + 1 is len
-            return true
-          else
-            arr-wildcard-matched = true
-            targets-left = len - i - 1
-            i = target-len - targets-left
-        else
-          return false unless eq target-node[i], node
-          i++
-      arr-wildcard-matched or len is target-len
+      match-array selector-node, target-node
     else
       false
+
+  function match-array pattern, input
+    pattern-len = pattern.length
+
+    if pattern-len is 0
+      input.length is 0
+    else if pattern-len is 1
+      if is-array-wildcard pattern.0
+        if that.name
+          main-node._named ?= {}
+          main-node._named[that] ?= []
+          main-node._named[that] ++= input
+        true
+      else
+        input.length is 1 and eq input.0, pattern.0
+    else if input.length is 0
+      false
+    else
+      [pattern-first, ...pattern-rest] = pattern
+      [input-first, ...input-rest] = input
+
+      if is-array-wildcard pattern-first
+        if that.name
+          array-wildcard-name = that
+          main-node._named ?= {}
+          main-node._named[array-wildcard-name] ?= []
+        if eq input-first, pattern-rest.0
+          wildcard-name = that
+          if match-array (tail pattern-rest), input-rest
+            true
+          else
+            delete main-node._named[wildcard-name] if typeof! wildcard-name is 'String'
+            match-array pattern, input-rest
+        else
+          main-node._named[array-wildcard-name].push input-first if array-wildcard-name
+          match-array pattern, input-rest
+      else
+        eq input-first, pattern-first and match-array pattern-rest, input-rest
 
   function match-special target-node, selector-node
     switch selector-node.grasp-type
@@ -57,7 +80,7 @@
           false
       else
         named[name] = target-node
-        true
+        name # aka 'true' - returns name in order to remove if failed later
     | 'node-type'
       target-node.type is selector-node.value
     | 'matches'
@@ -69,9 +92,9 @@
       attr-match = all (match-attr target-node), selector-node.attrs
       ident-match and attr-match
 
-  function match-array-wildcard node
+  function is-array-wildcard node
     clean-node = if node.type is 'ExpressionStatement' then node.expression else node
-    clean-node.type is 'Grasp' and clean-node.grasp-type is 'array-wildcard'
+    clean-node.type is 'Grasp' and clean-node.grasp-type is 'array-wildcard' and clean-node
 
   function match-attr target-node
     (attr) ->

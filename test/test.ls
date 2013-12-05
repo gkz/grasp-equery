@@ -110,20 +110,69 @@ suite 'wildcard' ->
     test '0 elements' ->
       code = 'function f() {}'
       eq code, 'function f(_$) { _$ }', code
+      eq '[]', '[]', '[]'
+      eq '[]', '[_$]', '[]'
 
     test 'other elements' ->
       eq code-func, 'function addTwo(x, z) { _$; return y + x; }', code
       eq code-func, 'function addTwo(x, z) { var y = 2; _$; }', code
       eq code-func, 'function addTwo(x, z) { var y = 2; _$; return y + x; }', code
 
-    test 'with an array' ->
-      code2 = '[1]'
-      eq code2, '[1, _$]', code2
+    test 'elements in the middle' ->
+      eq code-func, 'function addTwo(x, z) { _$; z(); _$ }', code
 
+    suite 'list' ->
       code = '[1,2,3,4]'
-      eq code, '[1, _$]', code
-      eq code, '[1, 2, _$]', code
-      eq code, '[1, _$, 4]', code
+
+      test 'one element' ->
+        code = '[1]'
+        eq code, '[1, _$]', code
+        eq code, '[_$, 1]', code
+
+      test 'multiple elements' ->
+        eq code, '[_$]', code
+        eq code, '[_$, 1, _$, 2, _$, 3, _$, 4, _$]', code
+
+        eq [], '[3, _$]', code
+        eq [], '[_$, 3]', code
+
+        eq code, '[1, _$]', code
+        eq code, '[1, 2, _$]', code
+
+        eq code, '[_$, 4]', code
+        eq code, '[_$, 3, 4]', code
+
+        eq code, '[1, _$, 4]', code
+        eq code, '[1, _$, 3, 4]', code
+
+      test 'in the middle single el' ->
+        code = '[1]'
+        eq code, '[_$, 1, _$]', code
+
+      test 'in the middle multiple el' ->
+        eq code, '[_$, 3, _$]', code
+        eq [], '[_$, 3]', code
+        eq code, '[_$, 2, 3, _$]', code
+        eq [], '[_$, 7, _$]', code
+
+      test 'in the middle multiple el hanging el' ->
+        eq code, '[_$, 4, _$]', code
+        eq code, '[_$, 1, _$]', code
+
+        eq code, '[_$, 1, 2, 3, 4, _$]', code
+
+      test 'els in middle and sides' ->
+        code = '[1,2,3,4,5]'
+        eq code, '[1,_$,3,_$,5]', code
+        eq [], '[1,_$,5,_$,5]', code
+        eq code, '[1,_$,2,3,_$,5]', code
+        eq code, '[1,_$,2,3,4,_$,5]', code
+        eq [], '[1,_$,2,3,4,5,_$,5]', code
+
+      test '_$ in middle and sides' ->
+        code = '[1,2,3,4,5]'
+        eq code, '[_$, 1, _$, 4, _$]', code
+        eq [], '[_$, 5, _$, 4, _$]', code
 
 suite 'named wildcard' ->
   test 'simple' ->
@@ -154,15 +203,124 @@ suite 'named wildcard' ->
     eq same, '$a + $a', '2 + 2'
     eq [], '$a + $a', '1 + 2'
 
-  test 'with _$' ->
-    node =
-      type: 'CallExpression'
-      callee: p 'f'
-      arguments: [p n for n from 1 to 4]
-      _named:
+  suite 'with _$' ->
+    code = 'f(1,2,3,4)'
+    call = p code
+
+    test 'first' ->
+      call._named =
+        a: p '1'
+      eq call, 'f($a, _$)', code
+
+    test 'first multiple' ->
+      call._named =
+        a: p '1'
+        b: p '2'
+      eq call, 'f($a, $b, _$)', code
+
+    test 'last' ->
+      call._named =
+        b: p '4'
+      eq call, 'f(_$, $b)', code
+
+    test 'last multiple' ->
+      call._named =
+        a: p '3'
+        b: p '4'
+      eq call, 'f(_$, $a, $b)', code
+
+    test 'ends' ->
+      call._named =
         a: p '1'
         b: p '4'
-    eq node, 'f($a, _$, $b)', 'f(1,2,3,4)'
+      eq call, 'f($a, _$, $b)', code
+
+    test 'ends multiple' ->
+      call._named =
+        a: p '1'
+        c: p '2'
+        d: p '3'
+        b: p '4'
+      eq call, 'f($a, $c, _$, $d, $b)', code
+
+    test 'with literals simple' ->
+      call._named =
+        a: p '1'
+        b: p '4'
+      eq call, 'f($a, _$, 3, _$,  $b)', code
+
+    test 'with literals complex' ->
+      call._named =
+        a: p '1'
+        c: p '3'
+        b: p '4'
+      eq call, 'f($a, _$, 2, $c, _$,  $b)', code
+
+    test 'multiple the same' ->
+      call = p 'f(1,2,2,3,4)'
+      call._named =
+        a: p '1'
+        c: p '2'
+        b: p '4'
+      eq call, 'f($a, _$, 2, $c, _$,  $b)', 'f(1,2,2,3,4)'
+      eq call, 'f($a, _$, $c, $c, _$,  $b)', 'f(1,2,2,3,4)'
+
+  suite 'named' ->
+    code = '[1,2,3,4]'
+    array = p code
+
+    test 'all' ->
+      array._named = elements: [(p '1'), (p '2'), (p '3'), (p '4')]
+      eq array, '[_$elements]', code
+
+    test 'none' ->
+      array._named = elements: []
+      eq array, '[1, 2, 3, 4, _$elements]', code
+
+    test 'first' ->
+      array._named = elements: [(p '1'), (p '2'), (p '3')]
+      eq array, '[_$elements, 4]', code
+
+    test 'last' ->
+      array._named = elements: [(p '2'), (p '3'), (p '4')]
+      eq array, '[1, _$elements]', code
+
+    test 'middle' ->
+      array._named = elements: [(p '2'), (p '3')]
+      eq array, '[1, _$elements, 4]', code
+
+    test 'interspersed' ->
+      code = '[1,2,3,4,5,6,7]'
+      array = p code
+      array._named =
+        a: [(p '2'), (p '3')]
+        b: [(p '5'), (p '6')]
+      eq array, '[1, _$a, 4, _$b, 7]', code
+
+      array._named =
+        a: [(p '2')]
+        b: [(p '4')]
+        c: [(p '6')]
+      eq array, '[1, _$a, 3, _$b, 5, _$c, 7]', code
+
+    test 'statements' ->
+      code =
+        '''
+        function f(x) {
+          g(x);
+          obj[x] = x * x;
+          return x;
+        }
+        '''
+      func = p code
+      func._named =
+        statements:
+          * type: 'ExpressionStatement'
+            expression: p 'obj[x] = x * x;'
+          * type: 'ReturnStatement'
+            argument: p 'x'
+
+      eq func, 'function f(x) { g(x); _$statements }', code
 
 suite 'node type' ->
   test 'simple' ->

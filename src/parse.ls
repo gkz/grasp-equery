@@ -59,9 +59,10 @@ function process-node node
     else if name is '__'
       type: 'Grasp'
       grasp-type: 'wildcard'
-    else if name is '_$'
+    else if /^_\$(\w*)$/.exec name
       type: 'Grasp'
       grasp-type: 'array-wildcard'
+      name: that.1
     else if /^\$(\w+)$/.exec name
       type: 'Grasp'
       grasp-type: 'named-wildcard'
