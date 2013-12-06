@@ -26,7 +26,7 @@ function parse selector
   selector-body = parsed-selector.body
   throw new Error "Selector body can't be more than one statement" if selector-body.length > 1 # ?? TODO
   extracted-selector = get-node-at-path selector-body.0, path
-  final-selector = if extracted-selector.type is 'ExpressionStatement'
+  final-selector = if extracted-selector.type is 'ExpressionStatement' and not /;\s*$/.test selector
                    then extracted-selector.expression
                    else extracted-selector
   root = type: 'Root', value: final-selector

@@ -45,6 +45,11 @@ suite 'misc' ->
   test 'underscore identifier' ->
     eq code-each, '_.each("hi", false)', code
 
+  test 'expression statements' ->
+    eq 'f()', 'f()', 'f();'
+    eq {type: 'ExpressionStatement', expression: p 'f()'}, 'f();', 'f();'
+    eq {type: 'ExpressionStatement', expression: p '2 + 2'}, '2 + 2;', '2 + 2;'
+
   test 'loc' ->
     bi =
       type: 'BinaryExpression'
