@@ -50,6 +50,13 @@ suite 'misc' ->
     eq {type: 'ExpressionStatement', expression: p 'f()'}, 'f();', 'f();'
     eq {type: 'ExpressionStatement', expression: p '2 + 2'}, '2 + 2;', '2 + 2;'
 
+  test 'normal object use' ->
+    code = '({_: blah})'
+    eq code, '({_:blah})', code
+
+    code2 = '({a: b})'
+    eq code2, '({a:b})', code2
+
   test 'loc' ->
     bi =
       type: 'BinaryExpression'
@@ -105,6 +112,13 @@ suite 'wildcard' ->
     test 'sub parts' ->
       eq code-func, 'function addTwo(x, z) { var __ = 2; z(); return y + x; }', code
       eq code-func, 'function addTwo(__, z) { var y = __; z(); return __ + x; }', code
+
+    test 'object' ->
+      code = '({a: 1, b: 2, c: 3})'
+      eq code, '{_:_, b:2, _:_}', code
+      eq [], '{_:_, b:2}', code
+      eq [], '{b:2, _:_}', code
+      eq code, '{_:_, _:_, _:_}', code
 
   suite 'array' ->
     test 'simple' ->
@@ -186,23 +200,23 @@ suite 'wildcard' ->
         eq code, '({_:$})', code
 
       test 'start' ->
-        eq code, '({_:$, y:2, z:3})', code
+        eq code, '{_:$, y:2, z:3}', code
 
       test 'end' ->
-        eq code, '({w:0, x:1, _:$})', code
+        eq code, '{w:0, x:1, _:$}', code
 
       test 'surround' ->
-        eq code, '({_:$, x:1, _:$})', code
+        eq code, '{_:$, x:1, _:$}', code
 
       test 'middle' ->
-        eq code, '({w:0, _:$, z:3})', code
+        eq code, '{w:0, _:$, z:3}', code
 
       test 'hanging' ->
-        eq code, '({w:0, x:1, y:2, z: 3, _:$})', code
+        eq code, '{w:0, x:1, y:2, z: 3, _:$}', code
 
       test 'fail' ->
-        eq [], '({_:$, x:0, _:$})', code
-        eq [], '({x:1, _:$, z:3})', code
+        eq [], '{_:$, x:0, _:$}', code
+        eq [], '{x:1, _:$, z:3}', code
 
 suite 'named wildcard' ->
   test 'simple' ->
@@ -232,6 +246,17 @@ suite 'named wildcard' ->
 
     eq same, '$a + $a', '2 + 2'
     eq [], '$a + $a', '1 + 2'
+
+  test 'object' ->
+    code = '({a:1, b:2, c:3})'
+    obj = p code
+    obj._named =
+      b:
+        key: p 'b'
+        value: p '2'
+        kind: 'init'
+
+    eq obj, '{a:1, $:b, c:3}', code
 
   suite 'with _$' ->
     code = 'f(1,2,3,4)'
@@ -362,7 +387,7 @@ suite 'named wildcard' ->
 
     test 'start' ->
       obj._named = begin: [{key: (p k), value: (p v), kind: 'init'} for k, v of {w: '0', x: '1'}]
-      eq obj, '({_:$begin, y:2, z:3})', code
+      eq obj, '{_:$begin, y:2, z:3}', code
 
 suite 'node type' ->
   test 'simple' ->

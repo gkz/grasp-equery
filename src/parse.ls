@@ -8,6 +8,8 @@ function parse selector
       path: []
     * code: "function f(){ #selector; }"
       path: ['body' 'body' 0]
+    * code: "(#selector)"
+      path: []
     * code: "while (true) { #selector; }"
       path: ['body' 'body' 0]
     * code: "switch (x) { #selector }"
@@ -51,9 +53,8 @@ function parse selector
         process-selector node
 
 function process-node node
-  node-type = node.type
-
-  if node-type is 'Identifier'
+  switch node.type
+  | 'Identifier' =>
     name = node.name
     if name is '_'
       null
@@ -83,7 +84,7 @@ function process-node node
         type: 'Grasp'
         grasp-type: 'node-type'
         value: alias-map[ident] or ident
-  else if node-type is 'MemberExpression'
+  | 'MemberExpression' =>
     return unless node.computed
 
     attrs = []
@@ -108,18 +109,24 @@ function process-node node
     grasp-type: 'compound'
     ident: ident
     attrs: processed-attrs
-  else if node-type is 'ExpressionStatement'
+  | 'ExpressionStatement' =>
     process-node node.expression
-  else if not node-type and node.key? and node.value?
+  | otherwise =>
+    return unless not node.type and node.key? and node.value?
     {key: node-key, value: node-value} = node
-
-    if node-key.type is 'Identifier'
-    and node-key.name is '_'
-    and node-value.type is 'Identifier'
-    and /^\$/.test node-value.name
+    return unless node-key.type is 'Identifier' and node-value.type is 'Identifier'
+    if node-key.name is '_'
+      if node.value.name is '_'
+        type: 'Grasp'
+        grasp-type: 'wildcard'
+      else if /^\$/.test node-value.name
+        type: 'Grasp'
+        grasp-type: 'array-wildcard'
+        name: /^\$(\w*)$/.exec node-value.name .1
+    else if node-key.name is '$'
       type: 'Grasp'
-      grasp-type: 'array-wildcard'
-      name: /^\$(\w*)$/.exec node-value.name .1
+      grasp-type: 'named-wildcard'
+      name: node-value.name
 
 function process-attr attr
   attr-type = attr.type
