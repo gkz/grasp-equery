@@ -22,6 +22,11 @@ ret =
   argument: p 'y + x'
 
 suite 'misc' ->
+  test 'version' ->
+    fs = require 'fs'
+    current-version = JSON.parse fs.read-file-sync 'package.json', 'utf8' .version
+    assert.strict-equal (require '..').VERSION, current-version
+
   test 'no matches' ->
     eq [], 'ZZ++', code
     eq [], 'var y = 4', code
