@@ -501,6 +501,11 @@ suite 'attrs' ->
     eq '({foo: 99})[x[y] = "foo"]', '__[x[y] = "foo"]', code
     eq 'arr[2]', '_ident[2]', code
 
+  test 'normal attr use - wildcard object and prop' ->
+    code = 'arr[2]()'
+    eq code, '__[__](_$)', code
+    eq code, '__[_num](_$)', code
+
 suite 'errors' ->
   test 'error processing selector' ->
     assert.throws (-> q '#@C$^HYYC$!$@CV', 'x'), /Error processing selector/

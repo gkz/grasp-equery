@@ -132,7 +132,10 @@ function process-attr attr
   attr-type = attr.type
 
   if attr-type is 'Identifier'
-    path: [attr.name]
+    if process-node attr
+      return
+    else
+      path: [attr.name]
   else if attr-type is 'MemberExpression'
     path = get-member-path attr
     return unless path
