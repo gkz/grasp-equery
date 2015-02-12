@@ -19,7 +19,7 @@
       if selector-node.type is 'Grasp'
         match-special target-node, selector-node
       else
-        for prop of target-node when prop not in <[ loc start end _named ]>
+        for prop of target-node when prop not in <[ loc start end _named raw ]>
           return false unless eq target-node[prop], selector-node[prop]
         true
     else if selector-node-type is 'Array'

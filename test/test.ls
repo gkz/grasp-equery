@@ -95,6 +95,10 @@ suite 'misc' ->
           column: 14
     eq bi, '__ + __', code, false, false, true
 
+  test 'strings' ->
+    eq "'hi'", '"hi"', "var string = 'hi';"
+    eq '"hi"', "'hi'", 'var string = "hi";'
+
 suite 'wildcard' ->
   suite 'single' ->
     test 'simple' ->
