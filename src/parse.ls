@@ -111,22 +111,20 @@ function process-node node
     attrs: processed-attrs
   | 'ExpressionStatement' =>
     process-node node.expression
-  | otherwise =>
-    return unless not node.type and node.key? and node.value?
-    {key: node-key, value: node-value} = node
-    return unless node-key.type is 'Identifier' and node-value.type is 'Identifier'
-    if node-key.name is '_'
+  | 'Property' =>
+    return unless node.key.type is 'Identifier' and node.value.type is 'Identifier'
+    if node.key.name is '_'
       if node.value.name is '_'
         type: 'Grasp'
         grasp-type: 'wildcard'
-      else if /^\$/.test node-value.name
+      else if /^\$/.test node.value.name
         type: 'Grasp'
         grasp-type: 'array-wildcard'
-        name: /^\$(\w*)$/.exec node-value.name .1
-    else if node-key.name is '$'
+        name: /^\$(\w*)$/.exec node.value.name .1
+    else if node.key.name is '$'
       type: 'Grasp'
       grasp-type: 'named-wildcard'
-      name: node-value.name
+      name: node.value.name
 
 function process-attr attr
   attr-type = attr.type

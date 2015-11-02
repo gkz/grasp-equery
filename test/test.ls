@@ -209,23 +209,23 @@ suite 'wildcard' ->
         eq code, '({_:$})', code
 
       test 'start' ->
-        eq code, '{_:$, y:2, z:3}', code
+        eq code, '({_:$, y:2, z:3})', code
 
       test 'end' ->
-        eq code, '{w:0, x:1, _:$}', code
+        eq code, '({w:0, x:1, _:$})', code
 
       test 'surround' ->
-        eq code, '{_:$, x:1, _:$}', code
+        eq code, '({_:$, x:1, _:$})', code
 
       test 'middle' ->
-        eq code, '{w:0, _:$, z:3}', code
+        eq code, '({w:0, _:$, z:3})', code
 
       test 'hanging' ->
-        eq code, '{w:0, x:1, y:2, z: 3, _:$}', code
+        eq code, '({w:0, x:1, y:2, z: 3, _:$})', code
 
       test 'fail' ->
-        eq [], '{_:$, x:0, _:$}', code
-        eq [], '{x:1, _:$, z:3}', code
+        eq [], '({_:$, x:0, _:$})', code
+        eq [], '({x:1, _:$, z:3})', code
 
 suite 'named wildcard' ->
   test 'simple' ->
@@ -261,6 +261,7 @@ suite 'named wildcard' ->
     obj = p code
     obj._named =
       b:
+        type: 'Property'
         key: p 'b'
         value: p '2'
         kind: 'init'
@@ -391,12 +392,12 @@ suite 'named wildcard' ->
     obj = p code
 
     test 'all' ->
-      obj._named = props: [{key: (p k), value: (p v), kind: 'init'} for k, v of {w: '0', x: '1', y: '2', z: '3'}]
+      obj._named = props: [{type: 'Property', key: (p k), value: (p v), kind: 'init'} for k, v of {w: '0', x: '1', y: '2', z: '3'}]
       eq obj, '({_:$props})', code
 
     test 'start' ->
-      obj._named = begin: [{key: (p k), value: (p v), kind: 'init'} for k, v of {w: '0', x: '1'}]
-      eq obj, '{_:$begin, y:2, z:3}', code
+      obj._named = begin: [{type: 'Property', key: (p k), value: (p v), kind: 'init'} for k, v of {w: '0', x: '1'}]
+      eq obj, '({_:$begin, y:2, z:3})', code
 
 suite 'node type' ->
   test 'simple' ->

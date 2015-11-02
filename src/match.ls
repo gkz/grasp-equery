@@ -1,4 +1,4 @@
-{primitive-only-attributes, either-attributes} = require 'grasp-syntax-javascript'
+{primitive-only-attributes, either-attributes, syntax-flat} = require 'grasp-syntax-javascript'
 {all, tail} = require 'prelude-ls'
 {get-node-at-path} = require './common'
 
@@ -6,33 +6,34 @@
   if eq main-node, query
     results.push main-node
 
-  for key, val of main-node when key not in <[ loc start end _named ]> and typeof! val in <[ Object Array ]>
-    match-node results, query, val
+  spec = syntax-flat[main-node.type]
+  for key in spec.nodes || [] when main-node[key]
+    match-node results, query, main-node[key]
+  for key in spec.node-arrays || []
+    for sub-node in main-node[key] when sub-node
+      match-node results, query, sub-node
 
   function eq target-node, selector-node
-    selector-node-type = typeof! selector-node
-    if selector-node is target-node
+    if target-node is selector-node
       true
-    else if selector-node-type isnt typeof! target-node
-      false
-    else if selector-node-type is 'Object'
-      if selector-node.type is 'Grasp'
-        match-special target-node, selector-node
-      else
-        for prop of target-node when prop not in <[ loc start end _named raw ]>
-          return false unless eq target-node[prop], selector-node[prop]
-        true
-    else if selector-node-type is 'Array'
-      match-array selector-node, target-node
+    else if selector-node.type is 'Grasp'
+      match-special target-node, selector-node
+    else if selector-node.type is target-node.type
+      type = selector-node.type
+      spec = syntax-flat[type]
+      all (-> eq target-node[it], selector-node[it]), spec.nodes || [] and
+      all (-> match-array target-node[it], selector-node[it]), spec.node-arrays || [] and
+      all (-> target-node[it] is selector-node[it]), spec.primitives || []
     else
       false
 
-  function match-array pattern, input
-    pattern-len = pattern.length
+  function match-array input, pattern
+    if typeof! pattern is 'Object' and pattern.type is 'Grasp'
+        return match-special input, pattern
 
-    if pattern-len is 0
+    if pattern.length is 0
       input.length is 0
-    else if pattern-len is 1
+    else if pattern.length is 1
       if is-array-wildcard pattern.0
         if that.name
           main-node._named ?= {}
@@ -54,16 +55,16 @@
           main-node._named[array-wildcard-name] ?= []
         if eq input-first, pattern-rest.0
           wildcard-name = that
-          if match-array (tail pattern-rest), input-rest
+          if match-array input-rest, (tail pattern-rest)
             true
           else
             delete main-node._named[wildcard-name] if typeof! wildcard-name is 'String'
-            match-array pattern, input-rest
+            match-array input-rest, pattern
         else
           main-node._named[array-wildcard-name].push input-first if array-wildcard-name
-          match-array pattern, input-rest
+          match-array input-rest, pattern
       else
-        eq input-first, pattern-first and match-array pattern-rest, input-rest
+        eq input-first, pattern-first and match-array input-rest, pattern-rest
 
   function match-special target-node, selector-node
     switch selector-node.grasp-type
