@@ -3,7 +3,7 @@ require! [acorn, assert]
 {map, all, is-type, keys} = require 'prelude-ls'
 
 p = (input, {unwrap-exp-state=true, unwrap-program=true} = {}) ->
-  res = acorn.parse input
+  res = acorn.parse input, {ecma-version: 6, source-type: 'module'}
   res-prime = if unwrap-program then res.body.0 else res
   if unwrap-exp-state and res-prime.type is 'ExpressionStatement' then res-prime.expression else res-prime
 
@@ -14,7 +14,7 @@ extract = (options, input) -->
     p input, options
 
 q = (selector, code, locations = false) ->
-  query selector, (acorn.parse code, {locations})
+  query selector, (acorn.parse code, {locations, ecma-version: 6, source-type: 'module'})
 
 deep-equal = (actual, expected) !->
   type-actual = typeof! actual
@@ -46,4 +46,13 @@ eq = (answers, selectors, code, unwrap-exp-state = true, unwrap-program = true, 
       console.log results
       throw e
 
-module.exports = {eq, p, q}
+make-prop = (key, value) ->
+  type: 'Property'
+  key: p key
+  value: p value
+  kind: 'init'
+  method: false
+  shorthand: false
+  computed: false
+
+module.exports = {eq, p, q, make-prop}

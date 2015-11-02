@@ -1,4 +1,4 @@
-{eq, p, q} = require './_utils'
+{eq, p, q, make-prop} = require './_utils'
 require! assert
 
 code-func = '''
@@ -260,11 +260,7 @@ suite 'named wildcard' ->
     code = '({a:1, b:2, c:3})'
     obj = p code
     obj._named =
-      b:
-        type: 'Property'
-        key: p 'b'
-        value: p '2'
-        kind: 'init'
+      b: make-prop 'b', '2'
 
     eq obj, '{a:1, $:b, c:3}', code
 
@@ -392,11 +388,11 @@ suite 'named wildcard' ->
     obj = p code
 
     test 'all' ->
-      obj._named = props: [{type: 'Property', key: (p k), value: (p v), kind: 'init'} for k, v of {w: '0', x: '1', y: '2', z: '3'}]
+      obj._named = props: [make-prop k, v for k, v of {w: '0', x: '1', y: '2', z: '3'}]
       eq obj, '({_:$props})', code
 
     test 'start' ->
-      obj._named = begin: [{type: 'Property', key: (p k), value: (p v), kind: 'init'} for k, v of {w: '0', x: '1'}]
+      obj._named = begin: [make-prop k, v for k, v of {w: '0', x: '1'}]
       eq obj, '({_:$begin, y:2, z:3})', code
 
 suite 'node type' ->
@@ -407,7 +403,6 @@ suite 'node type' ->
     eq 'y + x', '_ident + x', code
 
   test 'func' ->
-    eq code-func, 'function _ident(_ident, _ident) { _var_decs; _exp_statement; _return; }', code
     eq code-func, 'function _ident(x, z) { var _ident = _literal; _ident(); return _ident + _ident; }', code
 
 suite 'matches' ->
@@ -444,11 +439,7 @@ suite 'literals' ->
     eq '/re/gi', <[ _regex _RegExp ]>, code
 
 suite 'attrs' ->
-  prop =
-    type: 'Property'
-    key: p 'key'
-    value: p '2'
-    kind: 'init'
+  prop = make-prop 'key', '2'
 
   test 'existance' ->
     eq 'y + x', '__[right]', code
@@ -517,3 +508,35 @@ suite 'errors' ->
 
   test 'multiple statements in selector body' ->
     assert.throws (-> q 'x;y', 'x'), /Selector body can't be more than one statement/
+
+suite 'es6' ->
+  code = '''
+    import * as x from 'lib';
+    import {x, y} from 'lab';
+    class A extends B {
+        constructor(x, y, z) {
+            super(x, y);
+            this.z = z;
+        }
+        toString() {
+            return super.toString() + ' of ' + this.z;
+        }
+    }
+    function* fib() {
+      let a = 0, b = 1;
+      while (true) {
+        yield a;
+        [a, b] = [b, a + b];
+      }
+    }
+    export const PI = 4;
+    '''
+  test 'modules' ->
+    eq "import * as x from 'lib'", "import * as __ from 'lib'", code
+
+  test 'yield' ->
+    y =
+      type: 'YieldExpression'
+      argument: p 'a'
+      delegate: false
+    eq y, 'yield a', code

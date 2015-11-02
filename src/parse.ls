@@ -8,6 +8,8 @@ function parse selector
       path: []
     * code: "function f(){ #selector; }"
       path: ['body' 'body' 0]
+    * code: "function* f(){ #selector; }"
+      path: ['body' 'body' 0]
     * code: "(#selector)"
       path: []
     * code: "while (true) { #selector; }"
@@ -18,7 +20,7 @@ function parse selector
       path: ['handlers' 0]
   for {code}:attempt in attempts
     try
-      parsed-selector = acorn.parse code
+      parsed-selector = acorn.parse code, {ecma-version: 6, source-type: 'module'}
       path = attempt.path
       break
     catch
