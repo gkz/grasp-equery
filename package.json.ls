@@ -1,5 +1,5 @@
 name: 'grasp-equery'
-version: '0.2.3'
+version: '0.3.0'
 
 author: 'George Zahariev <z@georgezahariev.com>'
 description: 'grasp query using example code with wildcards'
@@ -31,7 +31,7 @@ scripts:
 dependencies:
   'prelude-ls': '~1.1.2'
   acorn: '~2.5.0'
-  'grasp-syntax-javascript': '~0.1.0'
+  'grasp-syntax-javascript': '~0.2.0'
 
 dev-dependencies:
   livescript: '~1.4.0'
