@@ -19,10 +19,7 @@ files:
 main: './lib/'
 
 bugs: 'https://github.com/gkz/grasp-equery/issues'
-licenses:
-  * type: 'MIT'
-    url: 'https://raw.github.com/gkz/grasp-equery/master/LICENSE'
-  ...
+license: 'MIT'
 engines:
   node: '>= 0.8.0'
 repository:
@@ -32,11 +29,11 @@ scripts:
   test: "make test"
 
 dependencies:
-  'prelude-ls': '~1.1.1'
-  acorn: '~0.6.0'
+  'prelude-ls': '~1.1.2'
+  acorn: '~2.5.0'
   'grasp-syntax-javascript': '~0.1.0'
 
 dev-dependencies:
-  LiveScript: '~1.3.1'
+  livescript: '~1.4.0'
   mocha: '~2.1.0'
   istanbul: '~0.3.5'
