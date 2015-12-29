@@ -1,7 +1,7 @@
 {parse} = require './parse'
 {match-node} = require './match'
 
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 
 query = (selector, ast) ->
   query-parsed (parse selector), ast
