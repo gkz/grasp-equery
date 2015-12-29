@@ -29,11 +29,11 @@ scripts:
   test: "make test"
 
 dependencies:
-  'prelude-ls': '~1.1.2'
-  acorn: '~2.5.0'
-  'grasp-syntax-javascript': '~0.2.0'
+  'prelude-ls': '^1.1.2'
+  acorn: '^2.6.4'
+  'grasp-syntax-javascript': '^0.2.0'
 
 dev-dependencies:
-  livescript: '~1.4.0'
-  mocha: '~2.1.0'
-  istanbul: '~0.3.5'
+  livescript: '^1.4.0'
+  mocha: '^2.3.4'
+  istanbul: '^0.4.1'
