@@ -7,6 +7,9 @@
     results.push main-node
 
   spec = syntax-flat[main-node.type]
+  if not spec?
+      return
+
   for key in spec.nodes || [] when main-node[key]
     match-node results, query, main-node[key]
   for key in spec.node-arrays || []
