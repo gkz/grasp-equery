@@ -1,5 +1,5 @@
 name: 'grasp-equery'
-version: '0.3.2'
+version: '0.4.0'
 
 author: 'George Zahariev <z@georgezahariev.com>'
 description: 'grasp query using example code with wildcards'
