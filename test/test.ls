@@ -69,6 +69,7 @@ suite 'misc' ->
       left:
         type: 'Identifier'
         name: 'y'
+        optional: false
         loc:
           start:
             line: 4
@@ -79,6 +80,7 @@ suite 'misc' ->
       right:
         type: 'Identifier'
         name: 'x'
+        optional: false
         loc:
           start:
             line: 4
@@ -124,10 +126,10 @@ suite 'wildcard' ->
 
     test 'object' ->
       code = '({a: 1, b: 2, c: 3})'
-      eq code, '{_:_, b:2, _:_}', code
-      eq [], '{_:_, b:2}', code
-      eq [], '{b:2, _:_}', code
-      eq code, '{_:_, _:_, _:_}', code
+      eq code, '({_:_, b:2, _:_})', code
+      eq [], '({_:_, b:2})', code
+      eq [], '({b:2, _:_})', code
+      eq code, '({_:_, _:_, _:_})', code
 
   suite 'array' ->
     test 'simple' ->
@@ -262,7 +264,7 @@ suite 'named wildcard' ->
     obj._named =
       b: make-prop 'b', '2'
 
-    eq obj, '{a:1, $:b, c:3}', code
+    eq obj, '({a:1, $:b, c:3})', code
 
   suite 'with _$' ->
     code = 'f(1,2,3,4)'
@@ -503,9 +505,6 @@ suite 'attrs' ->
     eq code, '__[_num](_$)', code
 
 suite 'errors' ->
-  test 'error processing selector' ->
-    assert.throws (-> q '#@C$^HYYC$!$@CV', 'x'), /Error processing selector/
-
   test 'multiple statements in selector body' ->
     assert.throws (-> q 'x;y', 'x'), /Selector body can't be more than one statement/
 

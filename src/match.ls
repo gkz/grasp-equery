@@ -8,8 +8,7 @@
 
   spec = syntax-flat[main-node.type]
   if not spec?
-      return
-
+    return
   for key in spec.nodes || [] when main-node[key]
     match-node results, query, main-node[key]
   for key in spec.node-arrays || []
@@ -24,6 +23,8 @@
     else if selector-node.type is target-node.type
       type = selector-node.type
       spec = syntax-flat[type]
+      if not spec?
+        return
       all (-> eq target-node[it], selector-node[it]), spec.nodes || [] and
       all (-> match-array target-node[it], selector-node[it]), spec.node-arrays || [] and
       all (-> target-node[it] is selector-node[it]), spec.primitives || []

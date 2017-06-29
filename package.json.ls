@@ -29,8 +29,8 @@ scripts:
   test: "make test"
 
 dependencies:
+  'flow-parser': '^0.*'
   'prelude-ls': '^1.1.2'
-  acorn: '^2.6.4'
   'grasp-syntax-javascript': '^0.2.0'
 
 dev-dependencies:

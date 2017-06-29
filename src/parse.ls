@@ -1,6 +1,7 @@
-require! acorn
+parser = require 'flow-parser'
 {alias-map, matches-map, matches-alias-map, literal-map} = require 'grasp-syntax-javascript'
 {get-node-at-path} = require './common'
+
 
 function parse selector
   attempts =
@@ -20,7 +21,9 @@ function parse selector
       path: ['handlers' 0]
   for {code}:attempt in attempts
     try
-      parsed-selector = acorn.parse code, {ecma-version: 6, source-type: 'module'}
+      parser-options =
+          source-type: 'module'
+      parsed-selector = parser.parse code, parser-options
       path = attempt.path
       break
     catch
@@ -38,8 +41,8 @@ function parse selector
   root.value
 
 !function process-selector ast
-  delete ast.start
-  delete ast.end
+  delete ast.loc
+  delete ast.range
   for key, node of ast when key isnt 'type'
     node-type = typeof! node
     if node-type is 'Array'
